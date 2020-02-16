@@ -1,32 +1,41 @@
+const express = require("express");
+const cors = require("cors");
+const bodyParser = require("body-parser");
+const app = express();
+require('./Database/connection');
 
-const express=require('express')
-const app= express();
-const cors = require('cors');
-app.use(cors());
-app.all('*', function(req, res, next) {
-    res.header("Access-Control-Allow-Origin", "*");
-    res.header("Access-Control-Allow-Headers", "X-Requested-With","Authorization");
-    next();
- });
- 
-const bodyParser=require('body-parser')
-const mongoose=require('mongoose');
+const userRouter = require('./routes/userroute');
+const imageRouter = require('./routes/imageadd');
+const adminRouter = require('./routes/adminroute');
+const frontendtRouter = require('./routes/frontendroute');
 
- 
-const UserController = require('./Controller/User');
-const MoneyController = require('./Controller/Money')
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json());
+app.use(express.static("./images"));
 
+// app.use(cors);
 
-mongoose.connect('mongodb://127.0.0.1:27017/Grouptracking',{
-    useNewUrlParser:true,
-    useCreateIndex:true,
-    useFindAndModify:false
+app.get("/", function(req, res) {
+    res.send("Travel Nepal Ai");
 })
-app.use(bodyParser.urlencoded({extended:true}))
+var corsOptions = {
+    "origin": "*",
+    "methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
+    "preflightContinue": false,
+    "optionsSuccessStatus": 204
+};
+
+app.use('/api/users', cors(corsOptions), userRouter);
+app.use('/api', cors(corsOptions), imageRouter);
+app.use('/api/admin', cors(corsOptions), adminRouter);
+app.use('/api', cors(corsOptions), frontendtRouter);
+
+// app.use(userRouter);
+// app.use(imageRouter);
+// app.use(adminRouter);
+// app.use(contactRouter);
 
 
-app.use('/api/user',UserController);
-app.use('/api/money',MoneyController);
-
-
-app.listen(3000, () => console.log('server is running'));
+// listen to port for incoming requests
+app.listen(5000);
+console.log('Server runs at http://localhost:' + 5000);
